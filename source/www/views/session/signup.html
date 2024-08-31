@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {{ template "shared" .Title }}
+</head>
+
+<body>
+    <h1>Sign up template</h1>
+    <div class="container">
+        <form id="signup-form" class="form">
+            <div class="mb-3" id="group-email">
+                <label class="form-label">E-mail</label>
+                <input type="text" name="email" class="form-control" />
+            </div>
+
+            <div class="mb-3" id="group-username">
+                <label for="username">Username </label>
+                <input type="text" name="username" class="form-control" />
+            </div>
+
+            <div class="mb-3" id="group-password">
+                <label for="password" class="form-label">Password</label>
+                <input type="text" name="password" class="form-control" />
+            </div>
+
+            <div class="mb-3" id="group-first-name">
+                <label for="first-name" class="form-label">First name</label>
+                <input type="text" name="first-name" class="form-control" />
+            </div>
+
+            <div class="mb-3" id="group-last-name">
+                <label for="lastname-name">Last name</label>
+                <input type="text" name="last-name" class="form-control" />
+            </div>
+
+            <div class="mb-3" id="group-phone-number">
+                <label for="phone-number" class="form-label">Phone number</label>
+                <input type="number" name="phone-number" class="form-control" />
+            </div>
+
+            <input type="submit" value="Send" class="btn btn-primary">
+        </form>
+    </div>
+    <script src="/public/js/signup.js"></script>
+</body>
+
+</html>

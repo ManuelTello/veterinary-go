@@ -1,0 +1,38 @@
+services:
+  app:
+    container_name: veterinary_app
+    image: golang:1.23-bookworm
+    ports:
+      - 8080:8080
+    environment:
+      PORT: 8080
+      GO_CWD: /veterinary
+      API_KEY: 6b8c0cd648c7400f92a82871b5a8a318
+      SQL_USER: sa
+      SQL_PASSWORD: VeRWnxMFO5m00AP
+      SQL_HOST: sql
+      SQL_SCHEMA: veterinary
+    volumes:
+      - ./source:/veterinary
+    depends_on:
+      sql:
+        condition: service_healthy
+        restart: true
+    tty: true
+
+  sql:
+    container_name: veterinary_sql
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+      - 1433:1433
+    volumes:
+      - ./startup.sql:/dependency/startup.sql
+    environment:
+      MSSQL_SA_PASSWORD: VeRWnxMFO5m00AP
+      ACCEPT_EULA: Y
+      MSSQL_PID: Developer
+    healthcheck:
+      test: [ "CMD", "/opt/mssql-tools18/bin/sqlcmd", "-U", "sa", "-P", "VeRWnxMFO5m00AP", "-S", "localhost", "-C", "-i", "/dependency/startup.sql" ]
+      interval: 5s
+      retries: 20
+      start_period: 0s
