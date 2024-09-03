@@ -10,128 +10,49 @@ type SessionModel struct {
 }
 
 type User struct {
-	Id          int
-	Username    string
-	Password    string
-	FirstName   string
-	LastName    string
-	DateCreated time.Time
-	Email       string
-	PhoneNumber int
-	RoleId      int
+	Id                int
+	Email             string
+	Password          string
+	CreatedOn         time.Time
+	FirstName         string
+	LastName          string
+	PhoneNumber       *int
+	AlternativeNumber *int
 }
 
-func (model SessionModel) InsertNewUser(username, password, firstname, lastname, email string, datecreated time.Time, phonenumber *int) error {
+func (model SessionModel) InsertNewUser(password, first_name, last_name, email string, created_on time.Time, phone_number, alternative_number *int) (int, error) {
 	var query string
 	transaction, transErr := model.storeContext.Begin()
 	if transErr != nil {
-		return transErr
+		return -1, transErr
 	}
 
 	var detailsId int
 	query = `
-	DECLARE @first_name AS VARCHAR(250) = @p1
-	DECLARE @last_name AS VARCHAR(250) = @p2
-	DECLARE @email AS VARCHAR(250) = @p3
-	DECLARE @date_created AS DATETIME = @p5
+	DECLARE @email AS VARCHAR(250) = @p1
+	DECLARE @password AS VARCHAR(250) = @p2
+	DECLARE @created_on AS DATETIME = @p3
+	DECLARE @first_name AS VARCHAR(250) = @p4
+	DECLARE @last_name AS VARCHAR(250) = @p5
 	DECLARE @phone_number AS INT = @p6
-	INSERT INTO [accounts_details] (
-		first_name, last_name, email, date_created, phone_number
+	DECLARE @alternative_number AS INT = @p7
+	INSERT INTO [accounts] (
+		email, password, created_on, first_name, last_name, phone_number, alternative_number
 	) 
 	OUTPUT Inserted.id 
-	VALUES (@first_name, @last_name, @email, ,@date_created ,@phone_number);
+	VALUES (@email, @password, @created_on, @first_name, @last_name, @phone_number, @alternative_number);
 	`
-	err := transaction.QueryRow(query, firstname, lastname, email, datecreated, phonenumber).Scan(&detailsId)
+	err := transaction.QueryRow(query, email, password, created_on, first_name, last_name, phone_number, alternative_number).Scan(&detailsId)
 	if err != nil {
 		transaction.Rollback()
-		return err
-	}
-
-	query = `
-	DECLARE @username AS VARCHAR(250) = @p1
-	DECLARE @password AS VARCHAR(250) = @p2
-	DECLARE @details_id AS INT = @p3
-	INSERT INTO [accounts](
-		username, password, details_id
-	)
-	VALUES (@username, @password, @details_id)
-	`
-	_, err = transaction.Exec(query, username, password, detailsId)
-
-	if err != nil {
-		transaction.Rollback()
-		return err
-	}
-
-	if commitErr := transaction.Commit(); commitErr != nil {
-		return commitErr
-	} else {
-		return nil
-	}
-}
-
-func (model SessionModel) SearchAccountByUsername(username string) (*User, error) {
-	transaction, err := model.storeContext.Begin()
-	var user *User
-	if err != nil {
-		return nil, err
-	}
-
-	query := `
-	DECLARE @username VARCHAR(250) = @p1
-	SELECT [accounts].id, [accounts].username, [accounts].password, 
-	[accounts_details].first_name, [accounts_details].last_name, [accounts_details].date_created,
-	[accounts_details].email, [accounts_details].phone_number,
-	FROM [accounts] INNER JOIN [accounts_details] 
-	ON [accounts].details_id = [accounts_details].id
-	WHERE accounts.username = @username
-	`
-	rows, queryErr := transaction.Query(query, username)
-	if queryErr != nil {
-		return nil, queryErr
-	}
-
-	for rows.Next() {
-		user = new(User)
-		scanErr := rows.Scan(&user.Id, &username, &user.Password, &user.FirstName, &user.LastName, &user.DateCreated, &user.Email, &user.PhoneNumber)
-		if scanErr != nil {
-			return nil, scanErr
-		}
-	}
-
-	transErr := transaction.Commit()
-	if transErr != nil {
-		transaction.Rollback()
-		return nil, transErr
-	}
-
-	return user, nil
-}
-
-func (model SessionModel) DoesUsernameExists(username string) (int, error) {
-	transaction, err := model.storeContext.Begin()
-	if err != nil {
 		return -1, err
 	}
 
-	query := `
-	DECLARE @username AS VARCHAR(250) = @p1
-	SELECT COUNT(*) FROM [accounts] WHERE [accounts].username = @username
-	`
-	var userExists int
-	scanErr := transaction.QueryRow(query, username).Scan(&userExists)
-
-	if scanErr != nil {
-		transaction.Rollback()
-		return -1, scanErr
+	if commitErr := transaction.Commit(); commitErr != nil {
+		return -1, commitErr
+	} else {
+		return detailsId, nil
 	}
-
-	if transErr := transaction.Commit(); transErr != nil {
-		transaction.Rollback()
-		return -1, transErr
-	}
-
-	return userExists, nil
 }
 
 func (model SessionModel) DoesEmailExists(email string) (int, error) {

@@ -8,19 +8,6 @@ type HelpersService struct {
 	sessionModel session_model.SessionModel
 }
 
-func (service HelpersService) SearchIfUsernameExists(username string) (bool, error) {
-	userExists, searchErr := service.sessionModel.DoesUsernameExists(username)
-	if searchErr != nil {
-		return false, searchErr
-	}
-
-	if userExists == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
-}
-
 func (service HelpersService) SearchIfEmailExists(email string) (bool, error) {
 	emailExists, searchErr := service.sessionModel.DoesEmailExists(email)
 	if searchErr != nil {

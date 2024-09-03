@@ -3,18 +3,18 @@ package session_dto
 import "time"
 
 type IncomingSignIn struct {
-	Username string `json:"username" binding:"required"`
+	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
 
 type IncomingSignUp struct {
-	Password    string    `json:"password"`
-	Username    string    `json:"username"`
-	FirstName   string    `json:"firstname"`
-	LastName    string    `json:"lastname"`
-	DateCreated time.Time `json:"datecreated"`
-	Email       string    `json:"email"`
-	PhoneNumber *int      `json:"phonenumber"`
+	Email             string    `json:"email"`
+	Password          string    `json:"password"`
+	FirstName         string    `json:"firs_tname"`
+	LastName          string    `json:"last_name"`
+	DateCreated       time.Time `json:"date_created"`
+	PhoneNumber       *int      `json:"phone_number"`
+	AlternativeNumber *int      `json:"alternative_number"`
 }
 
 type SessionToken struct {

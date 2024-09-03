@@ -1,4 +1,4 @@
-package session_controller
+package session_handlers
 
 import (
 	"net/http"
@@ -28,7 +28,6 @@ func ProcessSignUp(service session_service.SessionService) gin.HandlerFunc {
 		signupBody := new(session_dto.IncomingSignUp)
 		c.ShouldBindBodyWithJSON(signupBody)
 		err := service.ProcessSignUp(*signupBody)
-
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, "500 internal server error")
 		} else {

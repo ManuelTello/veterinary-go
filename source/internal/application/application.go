@@ -7,9 +7,9 @@ import (
 	"os"
 	"path/filepath"
 
-	helpers_controller "github.com/ManuelTello/veterinary/internal/controllers/helpers"
-	notfound_controller "github.com/ManuelTello/veterinary/internal/controllers/notfound"
-	session_controller "github.com/ManuelTello/veterinary/internal/controllers/session"
+	helpers_handlers "github.com/ManuelTello/veterinary/internal/handlers/helpers"
+	notfound_handlers "github.com/ManuelTello/veterinary/internal/handlers/notfound"
+	session_handlers "github.com/ManuelTello/veterinary/internal/handlers/session"
 	audit_model "github.com/ManuelTello/veterinary/internal/models/audit"
 	session_model "github.com/ManuelTello/veterinary/internal/models/session"
 	providers_store "github.com/ManuelTello/veterinary/internal/providers/store"
@@ -40,7 +40,7 @@ func (application Application) StartServer() {
 func (application Application) SetUpRoutes() {
 	application.ginServer.StaticFS("/public", http.Dir(filepath.Join(os.Getenv("GO_CWD"), "www", "static")))
 	application.ginServer.StaticFile("/favicon.ico", filepath.Join(os.Getenv("GO_CWD"), "www", "static", "favicon.ico"))
-	application.ginServer.NoRoute(notfound_controller.NotFound())
+	application.ginServer.NoRoute(notfound_handlers.NotFound())
 
 	application.ginServer.GET("/test", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "test.html", nil)
@@ -50,8 +50,8 @@ func (application Application) SetUpRoutes() {
 	sessionGroup := application.ginServer.Group("/session")
 	sessionGroup.Use()
 	{
-		sessionGroup.GET("signin", session_controller.SignInTemplate())
-		sessionGroup.GET("signup", session_controller.SignUpTemplate())
+		sessionGroup.GET("signin", session_handlers.SignInTemplate())
+		sessionGroup.GET("signup", session_handlers.SignUpTemplate())
 	}
 
 	// Specific API routes
@@ -68,16 +68,15 @@ func (application Application) SetUpRoutes() {
 			apiSession.Use()
 			{
 				service := session_service.New(session_model.New(application.sqlStore), audit_model.New(application.sqlStore))
-				apiSession.POST("signin", session_controller.ProcessSignIn(service))
-				apiSession.POST("signup", session_controller.ProcessSignUp(service))
+				apiSession.POST("signin", session_handlers.ProcessSignIn(service))
+				apiSession.POST("signup", session_handlers.ProcessSignUp(service))
 			}
 
 			apiHelpers := apiVersion_01.Group("helper")
 			apiHelpers.Use()
 			{
 				service := helpers_service.New(session_model.New(application.sqlStore))
-				apiHelpers.POST("repeatedusername", helpers_controller.SearchIfUsernameIsRepeated(service))
-				apiHelpers.POST("repeatedemail", helpers_controller.SearchIfEmailIsRepeated(service))
+				apiHelpers.POST("repeatedemail", helpers_handlers.SearchIfEmailIsRepeated(service))
 			}
 		}
 	}

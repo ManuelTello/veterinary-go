@@ -6,37 +6,29 @@ go
 
 create table roles(
 	id int not null identity,
-	name varchar(250),
-	description varchar(250),
+	role_name varchar(250) not null,
+	role_description varchar(250),
 	primary key(id)
 );
 go
 
 if not exists(select * from [roles] where [roles].id = 0 or [roles].id = 1 or [roles].id = 2) 
-insert into [roles](name,description) values
-('admin','Veterinary sys admin, all permissions granted'),
-('doctor','Veterinary doctor'),
-('client','Veterinary client');
-go
-
-create table accounts_details(
-	id int not null identity,
-	first_name varchar(250) not null,
-	last_name varchar(250) not null,
-	email varchar(250) not null,
-	date_created datetime not null,
-	phone_number int null,
-	primary key(id)
-);
+insert into [roles](role_name,role_description) values
+('admin','System admin, all permissions granted'),
+('doctor','Can view pets and owners information, and modify them'),
+('client','Usual pet owner, can edit their own profile, add new pets and reserve turns');
 go
 
 create table accounts(
 	id int not null identity,
+	email varchar(250) not null,
 	password varchar(250) not null,
-	username varchar(250) not null,
-	details_id int not null,
-	primary key(id),
-	foreign key(details_id) references accounts_details(id)
+	created_on datetime not null,
+	first_name varchar(250) not null,
+	last_name varchar(250) not null,
+	phone_number int,
+	alternative_number int,
+	primary key(id)
 );
 go
 

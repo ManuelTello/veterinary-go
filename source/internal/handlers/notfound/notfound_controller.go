@@ -1,4 +1,4 @@
-package notfound_controller
+package notfound_handlers
 
 import (
 	"net/http"
